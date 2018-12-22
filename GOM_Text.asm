@@ -17,33 +17,66 @@ printtext:
 .ex:
 	ret
 
-FormatAndDisplayAh:
+OutputAllRegisters:
+	SUB SP, 8
+	PUSH AX ; ESP 6
+	PUSH BX ; ESP 4
+	PUSH CX ; ESP 2
+	PUSH DX ; ESP 0 RET
+	CALL FormatAndDisplayAx
+	
+	
+	
+
+FormatAndDisplayAx:
 	CALL FormatNumber
 	CALL DisplayAh
 	RET
 
-FormatNumber:  ;Co zrobic jak jest wyzej niz 0x09? CMP? StaticCast?
-	MOV CH, AH
-	SHR CH, 4
-	AND CH, 0x0F
-	AND AH, 0x0F
-
-	AddNormal:
-	ADD CH, '0'
-	ADD AH, '0'
-	MOV BYTE [text_buffer], CH
+FormatNumber:
+	SUB SP, 2
+	PUSH AX ;AH gets pushed+2
+	SHR AH, 4
+	CALL FNcomparable
+	MOV BYTE [text_buffer], AH ;change it to AX support and change stringAX
+	POP AX
+	SUB SP, 2
+	AND AH, 0Fh
+	CALL FNcomparable
 	MOV BYTE [text_buffer+1], AH
-	XOR AH, AH
-	XOR CH, CH
-	ret
+	JMP FNcopyBuffer
+
+	FNcomparable:
+	CMP AH, 9
+	JA FNAbove
+	CALL AddNormal
+	RET
+	FNAbove:
+	CALL AddHexed
+	RET
+		
+	AddNormal:
+	ADD AH, '0'
+	RET
+	AddHexed:
+	SUB AH, 0Ah
+	ADD AH, 'A'
+	RET
+
+	FNcopyBuffer:
+	POP AX
+	ADD SP, 2
+	RET
 
 DisplayAh:
-	MOV SI, text_stringAH
-	call printtext
-	MOV SI, text_stringEq
+	MOV SI, text_stringAX
 	call printtext
 	MOV SI, text_buffer
 	call printtext
-	MOV SI, text_linebreak
+	MOV SI, text_linebreak ;I should optimize it to use callable function for print line and casual print
 	call printtext
 	RET	
+
+
+	text_stringAX db 'AX = 0000',0
+	text_buffer db 0,0,0,0,0,0,0,0
