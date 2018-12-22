@@ -18,13 +18,36 @@ printtext:
 	ret
 
 OutputAllRegisters:
-	SUB SP, 8
 	PUSH AX ; ESP 6
 	PUSH BX ; ESP 4
 	PUSH CX ; ESP 2
 	PUSH DX ; ESP 0 RET
+
+	MOV [text_stringAX], BYTE 'A'
 	CALL FormatAndDisplayAx
-	
+
+	ADD SP, 4
+	POP AX
+	SUB SP, 6
+	MOV [text_stringAX], BYTE 'B'
+	CALL FormatAndDisplayAx
+
+	ADD SP, 2
+	POP AX
+	SUB SP, 4
+	MOV [text_stringAX], BYTE 'C'
+	CALL FormatAndDisplayAx
+
+	POP AX
+	SUB SP, 2
+	MOV [text_stringAX], BYTE 'D'
+	CALL FormatAndDisplayAx
+
+	POP DX
+	POP CX
+	POP BX
+	POP AX
+	RET
 	
 	
 
@@ -34,19 +57,27 @@ FormatAndDisplayAx:
 	RET
 
 FormatNumber:
-	SUB SP, 2
-	PUSH AX ;AH gets pushed+2
-	SHR AH, 4
+	MOV BX, AX
+	SHR AX, 12
 	CALL FNcomparable
-	MOV BYTE [text_buffer], AH ;change it to AX support and change stringAX
-	POP AX
-	SUB SP, 2
-	AND AH, 0Fh
+	MOV BYTE [text_stringAX+5], AH
+	MOV AX, BX
+	SHR AX, 8
 	CALL FNcomparable
-	MOV BYTE [text_buffer+1], AH
-	JMP FNcopyBuffer
+	MOV BYTE [text_stringAX+6], AH
+	MOV AX, BX
+	SHR AX, 4
+	CALL FNcomparable
+	MOV BYTE [text_stringAX+7], AH
+	MOV AX, BX
+	CALL FNcomparable
+	MOV BYTE [text_stringAX+8], AH
+	
+	RET
 
 	FNcomparable:
+	MOV AH, AL
+	AND AH, 0Fh
 	CMP AH, 9
 	JA FNAbove
 	CALL AddNormal
@@ -61,11 +92,6 @@ FormatNumber:
 	AddHexed:
 	SUB AH, 0Ah
 	ADD AH, 'A'
-	RET
-
-	FNcopyBuffer:
-	POP AX
-	ADD SP, 2
 	RET
 
 DisplayAh:
