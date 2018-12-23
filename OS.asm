@@ -13,58 +13,69 @@ start:
 	MOV AL, 13h
 	INT 10h
 
-	
+	;clear screen black
 	MOV ax, 0A000h
 	MOV ES, AX ;I can't adress 0x000A 0000 in 16 bit, so I'm using STOSB for ES:DI, because 16*A000 is 0xA0000
 	MOV DI, 0 ;ES:DI
-	MOV AL, 04h
+	MOV AL, 00h
 	
-	loopTest:
+	memsetScr:
 	STOSB
 	CMP DI, 0FA00h
-	JE loop_2
-	JMP loopTest
+	JE stage2
+	JMP memsetScr
 	
-	loop_2:
-	PUSH AX
-	MOV AH, 10h
-	INT 16h
-	CMP AH, 3Bh
-	JE loop_
-	POP AX
-	INC AL
-	MOV DI, 0
-	JMP loopTest
+	stage2:
+	MOV AH, 2
+	MOV AL, 16 ;num of sec 512*16
+	XOR CH, CH 
+	MOV CL, 2 ;second sector
+	XOR DH, DH
+	MOV DL, 80h
+	MOV BX, 0
+	MOV ES, BX
+	MOV BX, 7E00h
+	INT 13h
 
-	loop_:
-	MOV AH, 10h
-	INT 16h
+	CALL OutputAllRegisters
+	JMP BX
+
+	;MOV AX, A000h
+	;MOV ES, AX
+
+	;loop_:
+	;MOV AH, 10h
+	;INT 16h
 
 	;Type your key combinations
-	CMP AH, 3Bh
-	JE OutputReg
+	;CMP AH, 3Bh
+	;JE OutputReg
 
-	JMP writeChar
+	;JMP writeChar
 	
-	OutputReg:
-	CALL OutputAllRegisters
-	JMP loop_
+	;OutputReg:
+	;CALL OutputAllRegisters
+	;JMP loop_
 
 	
 	
-	writeChar:
-	MOV AH, 0Eh
-	XOR BH, BH
-	MOV BL, 2 
-	INT 10h
+	;writeChar:
+	;MOV AH, 0Eh
+	;XOR BH, BH
+	;MOV BL, 2 
+	;INT 10h
 	
 
-	JMP loop_
-	hlt
+	;JMP loop_
+	;hlt
 
 		
 %include "GOM_Text.asm"
 	
 	
 	times 510-($-$$) db 0	
-	dw 0xAA55		
+	dw 0xAA55
+	
+
+	;Second sector
+%include "Kernel.asm"
