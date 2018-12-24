@@ -1,20 +1,22 @@
 text_linebreak db 0Dh, 0Ah, 00
 
 printtext:
-	mov ah, 0Eh
-	XOR CX, CX
-
+	PUSH AX
+	MOV AX, 0
+	MOV ES, AX
+	POP AX
+	PUSH BX
 .loop:
-	LEA BX, [si]
-	ADD BX, CX
-	MOV AL, [BX] 		
+	LODSB 		
 	cmp AL, 0
 	je .ex		
 	MOV AH, 0Eh
+	MOV BH, 0
+	MOV BL, 5
 	int 10h		
-	INC CX
 	jmp .loop
 .ex:
+	POP BX
 	ret
 
 OutputAllRegisters:
