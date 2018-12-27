@@ -59,29 +59,33 @@ OutputAllRegisters:
 	POP AX
 	RET
 	
-	
+
 
 FormatAndDisplayAx:
+	PUSH text_stringAX
 	CALL FormatNumber
 	CALL DisplayAh
+	ADD SP, 2
 	RET
 
+
 FormatNumber:
-	MOV BX, AX
+	MOV BX, [ESP+2] ;if available
+	MOV CX, AX
 	SHR AX, 12
 	CALL FNcomparable
-	MOV BYTE [text_stringAX+5], AH
-	MOV AX, BX
+	MOV BYTE [BX+4], AH
+	MOV AX, CX
 	SHR AX, 8
 	CALL FNcomparable
-	MOV BYTE [text_stringAX+6], AH
-	MOV AX, BX
+	MOV BYTE [BX+5], AH
+	MOV AX, CX
 	SHR AX, 4
 	CALL FNcomparable
-	MOV BYTE [text_stringAX+7], AH
-	MOV AX, BX
+	MOV BYTE [BX+6], AH
+	MOV AX, CX
 	CALL FNcomparable
-	MOV BYTE [text_stringAX+8], AH
+	MOV BYTE [BX+7], AH
 	
 	RET
 
@@ -114,5 +118,5 @@ DisplayAh:
 	RET	
 
 
-	text_stringAX db 'AX = 0000',0
+	text_stringAX db 'AX: 0000',0
 	text_buffer db 0,0,0,0,0,0,0,0

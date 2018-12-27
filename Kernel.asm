@@ -1,6 +1,10 @@
 ;RAM map:
 ;0x500 = b text color 
 ;0x501 = b mode indicator
+;0x502 = AX
+;0x504 = BX
+;0x506 = CX
+;0x508 = DX
 
 ;clear screen black
 PUSH 0 ;color
@@ -27,7 +31,6 @@ CALL printtext
 kernel_setdefmode:
 ;set default mode
 MOV [0x501], BYTE 0
-MOV [0x502], BYTE 1
 CALL renderer_setPal
 
 ;;================KERNEL MAIN LOOP===============;
@@ -41,11 +44,37 @@ JMP kernelMain
 Kernel_GetInput:
 MOV AH, 0
 INT 0x16
-NOP ;placeholder
-JZ Kernel_GetInput_noInput
-
+CMP [0x501], BYTE 0
+JE F1Input
 Kernel_GetInput_noInput:
 RET
+
+F1Input:
+CMP AH, 0x0E
+JE F1Delete
+;casual character
+MOV BL, [sF1CMDbufLen]
+AND BX, 0xFF
+CMP BL, 32  ;length
+JE Kernel_GetInput_noInput
+CMP AL, 0x1F
+JB Kernel_GetInput_noInput
+MOV [sF1CMDbuffer+BX], BYTE AL
+INC BYTE [sF1CMDbufLen]
+RET
+
+;backspace
+F1Delete:
+MOV BL, [sF1CMDbufLen]
+AND BX, 0xFF
+MOV [sF1CMDbuffer+BX], BYTE 0x00
+TEST BL, BL
+JZ Kernel_GetInput_noInput
+DEC BYTE [sF1CMDbufLen]
+MOV BL, [sF1CMDbufLen]
+MOV [sF1CMDbuffer+BX], BYTE 0x00
+RET
+
 
 ;;================KERNEL SWITCH==================;;
 
@@ -54,6 +83,12 @@ Kernel_ExecuteMode:
 	cKernel_Mode_F1:
 		CMP [0x501], BYTE 0
 		JNE cKernel_Mode_F2
+	;MOV AX, 0xCAFE
+	;MOV BX, 0xBABE
+	;MOV CX, 0xDEAD
+	;MOV DX, 0x1337
+	CALL StoreReg
+
 		CALL Kernel_F1
 		RET
 	cKernel_Mode_F2:
@@ -92,15 +127,15 @@ Kernel_F1:
 	PUSH 200
 	PUSH 0
 	PUSH 120
-	PUSH 180
+	PUSH 190
 	CALL DrawRectangle
 
 	;Draw input window
 	PUSH 0x12
 	PUSH 0
-	PUSH 180
+	PUSH 190
 	PUSH 320
-	PUSH 20
+	PUSH 10
 	CALL DrawRectangle
 
 	MOV [0x500], byte 0x34 ;set color
@@ -109,19 +144,68 @@ Kernel_F1:
 	PUSH 0x1B
 	CALL SetCursor
 	ADD SP, 4
-
 	MOV SI, sF1Registers
 	CALL printtext
 
+	
+	;AX
 	PUSH 02
 	PUSH 0x19
 	CALL SetCursor
 	ADD SP, 4
-
+	PUSH sF1AX
+	MOV AX, [0x502]
+	CALL FormatNumber
+	ADD SP, 2
 	MOV SI, sF1AX
 	CALL printtext
 
+	;BX
+	PUSH 03
+	PUSH 0x19
+	CALL SetCursor
+	ADD SP, 4
+	PUSH sF1BX
+	MOV AX, [0x504]
+	CALL FormatNumber
+	ADD SP, 2
+	MOV SI, sF1BX
+	CALL printtext
 	
+	;CX
+	PUSH 04
+	PUSH 0x19
+	CALL SetCursor
+	ADD SP, 4
+	PUSH sF1CX
+	MOV AX, [0x506]
+	CALL FormatNumber
+	ADD SP, 2
+	MOV SI, sF1CX
+	CALL printtext
+
+	;DX
+	PUSH 05
+	PUSH 0x19
+	CALL SetCursor
+	ADD SP, 4
+	PUSH sF1DX
+	MOV AX, [0x508]
+	CALL FormatNumber
+	ADD SP, 2
+	MOV SI, sF1DX
+	CALL printtext
+
+	;Commandline
+	MOV [0x500], BYTE 0x1E
+	PUSH 0x18
+	PUSH 01
+	CALL SetCursor
+	ADD SP, 4
+	MOV SI, sF1CMDbuf
+	CALL printtext
+	
+
 
 	ADD SP, 30
 	RET
@@ -134,11 +218,21 @@ Kernel_F3:
 	;
 	RET
 
-
+StoreReg:
+	MOV [0x502], WORD AX
+	MOV [0x504], WORD BX
+	MOV [0x506], WORD CX
+	MOV [0x508], WORD DX
+	RET
 
 
 sF1Registers: db "REGISTERS", 0
 sF1AX: db "AX: 0000", 0
-sF1CMDbuf: times 16 db 0
+sF1BX: db "BX: 0000", 0
+sF1CX: db "CX: 0000", 0
+sF1DX: db "DX: 0000", 0
+sF1CMDbuf: db "> "
+sF1CMDbuffer: times 33 db 0
+sF1CMDbufLen: db 0
 sKernelLoaded: db "Kernel loaded succesfully!", 0
 sKernelLoadedHddErrors: db "Kernel HDD error: ", 0
