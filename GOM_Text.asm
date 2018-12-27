@@ -12,12 +12,20 @@ printtext:
 	je .ex		
 	MOV AH, 0Eh
 	MOV BH, 0
-	MOV BL, BYTE [ramSpace]
+	MOV BL, BYTE [0x500]
 	int 10h		
 	jmp .loop
 .ex:
 	POP BX
 	ret
+
+SetCursor:
+	MOV AH, 02
+	XOR BH, BH
+	MOV DH, [ESP+4]
+	MOV DL, [ESP+2]
+	INT 0x10
+	RET
 
 OutputAllRegisters:
 	PUSH AX ; ESP 6

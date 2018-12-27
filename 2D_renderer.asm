@@ -9,22 +9,19 @@ DrawRectangle: ;color, x, y, width, height; I could optimize that by mixing colo
 	MOV ES, AX
 	
 	;now we calculate the x*y spot; Correct
-	ADD SP, 0x6
-	POP AX ;y
+	MOV AX, [ESP+6] ;y
 	MOV BX, 320
 	XOR DX, DX
 	MUL BX
-	POP BX ;x
+	MOV BX, [ESP+8] ;x
 	ADD AX, BX
 	
 	MOV DI, AX ;DI holds global offset (ES:DI)
-	POP AX
+	MOV AX, [ESP+0Ah] ;color
 	AND AX, 0xFF ;AL now holds color ;Correct
 
-	SUB SP, 0xA ;get back to W and H
-	POP DX ;H
-	POP CX; W
-	;SUB SP, 6 ;restore stack for RET
+	MOV DX, [ESP+2] ;H
+	MOV CX, [ESP+4] ;W
 
 	drawLoop:
 	
@@ -38,15 +35,14 @@ DrawRectangle: ;color, x, y, width, height; I could optimize that by mixing colo
 		JMP drawLoopWidth
 	
 		drawDoneWidth:
-		SUB SP, 2 ;get to stack H
 		ADD DI, 320 ;jump
-		POP CX ;reset W
+		MOV CX, [ESP+4] ;reset W
 		SUB DI, CX 
 		DEC DX ;decreases Y pointer
 		JMP drawLoop
 
 	drawDone:	
-	SUB SP, 6 
+	;SUB SP, 6 
 	RET
 
 

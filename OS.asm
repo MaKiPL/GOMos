@@ -2,7 +2,6 @@
 	org 07c00h
 
 JMP start
-ramSpace: dw 0x500
 
 
 start:
@@ -12,7 +11,7 @@ start:
 	mov sp, AX
 
 	;sets constants
-	MOV [ramSpace], BYTE 01 ;0x500 = text color
+	MOV [0x500], BYTE 01 ;0x500 = text color
 
 	
 	;sets graphic mode
@@ -33,7 +32,7 @@ start:
 	MOV BX, 7E00h
 	INT 13h
 
-	MOV [ramSpace+1], BYTE AH ;save return value for load sector for kernel use
+	MOV [0x501], BYTE AH ;save return value for load sector for kernel use
 	JMP BX ;BX holds the address of 0x7E000 that is after bootloader
 	
 %include "GOM_Text.asm"
