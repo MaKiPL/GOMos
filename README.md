@@ -15,6 +15,8 @@ Kernel in GOMos is expected to work in different modes changed by F1-12 keys. Ev
  # F1 assembler console
  Mode F1 resembles console where you are able to type real assembler commands which will be assemblied. It will contain real register statuses updated after every command inputted and action performed. It would be possible to fire BIOS interrupts, therefore one wrong mnemonic can cause unexpected outcome like jumping to 0x0000 and performing rubbish data as CPU mnemonics
  
+![F1 proof of concept image](F1.png?raw=true "Title")
+ 
  # F2 HEX RAM editor
  Mode F2 resembles casual visual HEX editors, but it's possible to actually overwrite any RAM space you want (including VGA memory totally overwriting the current renderer and breaking whole OS). This way you are able to actually text that you'll be able to use to write in BIOS teletype. 
  
