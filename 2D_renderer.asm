@@ -1,3 +1,7 @@
+renderer_setPal:
+	;placeholder
+	RET
+
 
 ;DrawRectangle breaks AX, BX, CX and DX
 DrawRectangle: ;color, x, y, width, height; I could optimize that by mixing color with height?
@@ -44,4 +48,6 @@ DrawRectangle: ;color, x, y, width, height; I could optimize that by mixing colo
 	drawDone:	
 	SUB SP, 6 
 	RET
+
+
 
