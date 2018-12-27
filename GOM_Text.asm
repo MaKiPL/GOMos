@@ -12,7 +12,7 @@ printtext:
 	je .ex		
 	MOV AH, 0Eh
 	MOV BH, 0
-	MOV BL, 5
+	MOV BL, BYTE [ramSpace]
 	int 10h		
 	jmp .loop
 .ex:

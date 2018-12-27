@@ -1,11 +1,18 @@
 	BITS 16
 	org 07c00h
 
+JMP start
+ramSpace: dw 0x500
+
+
 start:
 	;sets stack
 	mov ax, 07C00h
 	SUB AX, 4096		
 	mov sp, AX
+
+	;sets constants
+	MOV [ramSpace], BYTE 01 ;0x500 = text color
 
 	
 	;sets graphic mode
@@ -13,17 +20,6 @@ start:
 	MOV AL, 13h
 	INT 10h
 
-	;clear screen black
-	MOV ax, 0A000h
-	MOV ES, AX ;I can't adress 0x000A 0000 in 16 bit, so I'm using STOSB for ES:DI, because 16*A000 is 0xA0000
-	MOV DI, 0 ;ES:DI
-	MOV AL, 00h
-	
-	memsetScr:
-	STOSB
-	CMP DI, 0FA00h
-	JE stage2
-	JMP memsetScr
 	
 	stage2:
 	MOV AH, 2
@@ -37,39 +33,9 @@ start:
 	MOV BX, 7E00h
 	INT 13h
 
-	CALL OutputAllRegisters
-	JMP BX
-
-	;MOV AX, A000h
-	;MOV ES, AX
-
-	;loop_:
-	;MOV AH, 10h
-	;INT 16h
-
-	;Type your key combinations
-	;CMP AH, 3Bh
-	;JE OutputReg
-
-	;JMP writeChar
+	MOV [ramSpace+1], BYTE AH ;save return value for load sector for kernel use
+	JMP BX ;BX holds the address of 0x7E000 that is after bootloader
 	
-	;OutputReg:
-	;CALL OutputAllRegisters
-	;JMP loop_
-
-	
-	
-	;writeChar:
-	;MOV AH, 0Eh
-	;XOR BH, BH
-	;MOV BL, 2 
-	;INT 10h
-	
-
-	;JMP loop_
-	;hlt
-
-		
 %include "GOM_Text.asm"
 	
 	
@@ -79,3 +45,4 @@ start:
 
 	;Second sector
 %include "Kernel.asm"
+%include "2D_renderer.asm" ;this has to be AFTER kernel because of the bootloader
