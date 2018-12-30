@@ -36,6 +36,7 @@ start:
 	JMP BX ;BX holds the address of 0x7E000 that is after bootloader
 	
 %include "GOM_Text.asm"
+%include "2D_renderer.asm"
 	
 	
 	times 510-($-$$) db 0	
@@ -44,4 +45,3 @@ start:
 
 	;Second sector
 %include "Kernel.asm"
-%include "2D_renderer.asm" ;this has to be AFTER kernel because of the bootloader

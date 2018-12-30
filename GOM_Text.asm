@@ -27,6 +27,66 @@ SetCursor:
 	INT 0x10
 	RET
 
+;1st string pointer
+;2nd string pointer
+STRCMP:
+	MOV AX, 1
+	;test if they have the same length
+	PUSH WORD [ESP+2]
+	CALL STRLEN
+	MOV [0x600], BYTE AL
+	PUSH WORD [ESP+4]
+	CALL STRLEN
+	ADD SP, 4
+	CMP [0x600], AL
+	JE strcmp_testok
+	XOR AX, AX
+	
+	strcmp_testok:
+	PUSH BX
+	PUSH CX
+	XOR BX, BX	
+	XOR CX, CX
+	strcmp_charcomp:
+	MOV BX, [ESP+8]
+	ADD BX, CX
+	MOV AH, [BX]
+	TEST AH, AH
+	JZ strcmp_done
+	MOV [0x6000], AH
+	MOV BX, [ESP+6]
+	ADD BX, CX
+	INC CX
+	MOV AH, [BX]
+	CMP [0x6000], AH
+	JE strcmp_charcomp
+	MOV AX, 0
+	JMP strcmp_done
+
+	strcmp_done:
+	POP BX
+	POP CX
+
+	RET
+
+;string pointer
+STRLEN:
+	PUSH BX ; store
+	MOV AX, 0	
+	MOV BX, WORD [ESP+4] ;Get pointer
+	strlen_loop:
+		MOV AH, [BX]
+		TEST AH, AH
+		JZ strlen_done
+		INC BX
+		INC AX
+		JMP strlen_loop
+	strlen_done:
+	POP BX ; restore BX
+	AND AX, 0xFF
+	RET
+		
+
 OutputAllRegisters:
 	PUSH AX ; ESP 6
 	PUSH BX ; ESP 4

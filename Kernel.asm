@@ -5,6 +5,7 @@
 ;0x504 = BX
 ;0x506 = CX
 ;0x508 = DX
+;0x600 = memory vars
 
 ;clear screen black
 PUSH 0 ;color
@@ -49,9 +50,13 @@ JE F1Input
 Kernel_GetInput_noInput:
 RET
 
+;========F1 INPUT======;
+
 F1Input:
 CMP AH, 0x0E
 JE F1Delete
+CMP AH, 0x3C
+JE F1Test
 ;casual character
 MOV BL, [sF1CMDbufLen]
 AND BX, 0xFF
@@ -75,6 +80,15 @@ MOV BL, [sF1CMDbufLen]
 MOV [sF1CMDbuffer+BX], BYTE 0x00
 RET
 
+;F2 test
+F1Test:
+PUSH sF1Registers
+PUSH sF1Registers
+CALL STRCMP
+ADD SP, 4
+CALL StoreReg 
+RET
+
 
 ;;================KERNEL SWITCH==================;;
 
@@ -87,7 +101,7 @@ Kernel_ExecuteMode:
 	;MOV BX, 0xBABE
 	;MOV CX, 0xDEAD
 	;MOV DX, 0x1337
-	CALL StoreReg
+;	CALL StoreReg
 
 		CALL Kernel_F1
 		RET
