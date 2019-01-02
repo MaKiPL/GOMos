@@ -86,7 +86,15 @@ STRCLR:
 	POP AX
 	RET
 	
-	
+STRCPY:
+	PUSH CX
+	MOV SI, [ESP+8]
+	MOV DI, [ESP+6]
+	MOV CX, [ESP+4]
+	REP MOVSB
+	POP CX
+	RET
+		
 	
 	
 
