@@ -45,9 +45,22 @@ JMP kernelMain
 Kernel_GetInput:
 MOV AH, 0
 INT 0x16
+CMP AH, 0x3A
+JA SetMode
+inputSafeHandle:
 CMP [0x501], BYTE 0
 JE F1Input
+CMP [0x501], BYTE 1
+JE F2Input
+CMP [0x501], BYTE 2
+JE F3Input
 Kernel_GetInput_noInput:
+RET
+SetMode:
+CMP AH, 0x45
+JA inputSafeHandle ;return to parse function
+SUB AH, 0x3B
+MOV [0x501], AH 
 RET
 
 ;========F1 INPUT======;
@@ -55,8 +68,6 @@ RET
 F1Input:
 CMP AH, 0x0E
 JE F1Delete
-CMP AH, 0x3C
-JE F1Test
 ;casual character
 MOV BL, [sF1CMDbufLen]
 AND BX, 0xFF
@@ -80,13 +91,13 @@ MOV BL, [sF1CMDbufLen]
 MOV [sF1CMDbuffer+BX], BYTE 0x00
 RET
 
-;F2 test
-F1Test:
-PUSH sF1Registers
-PUSH sF1Registers
-CALL STRCMP
-ADD SP, 4
-CALL StoreReg 
+;========F2 INPUT======;
+F2Input:
+RET
+
+
+;========F3 INPUT======;
+F3Input:
 RET
 
 
@@ -97,12 +108,6 @@ Kernel_ExecuteMode:
 	cKernel_Mode_F1:
 		CMP [0x501], BYTE 0
 		JNE cKernel_Mode_F2
-	;MOV AX, 0xCAFE
-	;MOV BX, 0xBABE
-	;MOV CX, 0xDEAD
-	;MOV DX, 0x1337
-;	CALL StoreReg
-
 		CALL Kernel_F1
 		RET
 	cKernel_Mode_F2:
@@ -119,12 +124,48 @@ Kernel_ExecuteMode:
 	;Kernel_Mode_F4 ;placeholder
 
 cKernel_Mode_Default:
+CALL Kernel_UnknownMode
 RET ;return no mode
 
 
 
 ;;==================KERNEL MODES====================;;
 
+
+Kernel_UnknownMode:
+PUSH 0x00
+PUSH 0
+PUSH 0
+PUSH 320
+PUSH 200
+CALL DrawRectangle
+ADD SP, 0x0A
+PUSH text_buffer
+PUSH WORD 9
+CALL STRCLR
+ADD SP, 4 
+PUSH BX
+MOV BX, text_buffer
+SUB BX, 7
+PUSH BX
+MOVZX AX, [0x501]
+INC AL
+CALL FormatNumber
+POP BX ;clear
+POP BX
+ADD SP, 2
+PUSH BYTE 1
+PUSH BYTE 1
+CALL SetCursor
+ADD SP, 4
+MOV [0x500], BYTE 4
+MOV SI, sKernel_unknownMode
+CALL printtext
+MOV SI, text_buffer
+CALL printtext
+RET
+
+sKernel_unknownMode: db "Unknown mode: ", 0
 
 Kernel_F1:
 	
@@ -245,7 +286,7 @@ sF1AX: db "AX: 0000", 0
 sF1BX: db "BX: 0000", 0
 sF1CX: db "CX: 0000", 0
 sF1DX: db "DX: 0000", 0
-sF1CMDbuf: db "> "
+sF1CMDbuf: db 175,32
 sF1CMDbuffer: times 33 db 0
 sF1CMDbufLen: db 0
 sKernelLoaded: db "Kernel loaded succesfully!", 0

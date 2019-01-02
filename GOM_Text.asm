@@ -69,6 +69,28 @@ STRCMP:
 
 	RET
 
+;string pointer; clears buffer
+STRCLR:
+	PUSH AX ;store
+	PUSH CX ;store
+	MOV DI, [ESP+0x08] ;buffer
+	MOV CX, [ESP+6] ;count
+	MOV AX, ES
+	PUSH AX
+	XOR AX, AX
+	MOV ES, AX
+	REP STOSB
+	POP AX
+	MOV ES, AX
+	POP CX
+	POP AX
+	RET
+	
+	
+	
+	
+
+
 ;string pointer
 STRLEN:
 	PUSH BX ; store
