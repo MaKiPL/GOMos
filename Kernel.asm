@@ -91,10 +91,6 @@ MOV BL, [sF1CMDbufLen]
 MOV [sF1CMDbuffer+BX], BYTE 0x00
 RET
 
-;========F2 INPUT======;
-F2Input:
-RET
-
 
 ;========F3 INPUT======;
 F3Input:
@@ -265,10 +261,6 @@ Kernel_F1:
 	ADD SP, 30
 	RET
 
-Kernel_F2:
-	;
-	RET
-
 Kernel_F3:
 	;
 	RET
@@ -291,3 +283,5 @@ sF1CMDbuffer: times 33 db 0
 sF1CMDbufLen: db 0
 sKernelLoaded: db "Kernel loaded succesfully!", 0
 sKernelLoadedHddErrors: db "Kernel HDD error: ", 0
+
+%include "F2Mode.asm"
