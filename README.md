@@ -18,9 +18,19 @@ Kernel in GOMos is expected to work in different modes changed by F1-12 keys. Ev
 ![F1 proof of concept image](F1.png?raw=true "Title")
  
  # F2 HEX RAM editor
- Mode F2 resembles casual visual HEX editors, but it's possible to actually overwrite any RAM space you want (including VGA memory totally overwriting the current renderer and breaking whole OS). This way you are able to input your own code, payloads, modify the assembler code in runtime and/or change the text. It's up to you. 
+ Mode F2 resembles casual visual HEX editors, but it's possible to actually overwrite any RAM space you want (limited to 0000:FFFF). This way you are able to input your own code, payloads, modify the assembler code in runtime and/or change the text. It's up to you. Currently it's not possible to overwrite memory above 65k (A000:0000 (VGA) for example)
  
  ![F2 proof of concept image](F2.png?raw=true "Title")
+ 
+ Keyboard key | Description
+------------ | -------------
+PageUp | Shift memory 0x100 up
+PageDown | Shift memory 0x100 down
+Arrows | Cursor position
+0-9, A-F | Overwrites memory at given cursor position
+Home | Moves cursor to beginning of row
+End | Moves cursor to end of row
+
  
  # F3 Playground
  Mode F3 is meant to work as fun place. I'm not quite sure but I'll be trying to introduce some pseudo-3D rendering or things like that
