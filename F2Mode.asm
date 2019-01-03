@@ -1,4 +1,4 @@
-f2_curAdr: dw 0x0000
+f2_curAdr: dw 0x7c00
 f2_cursorAdr: dw 0x0000
 sF2lineNumber: db "0000: ", 0
 f2_inputSafevar: dw 0x0000
@@ -135,6 +135,7 @@ INC CL
 MOV [0x603], CL
 
 PUSH text_buffer-4
+XCHG AH, AL
 CALL FormatNumber
 ADD SP, 2
 MOV SI, text_buffer
