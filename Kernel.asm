@@ -94,6 +94,7 @@ RET
 
 ;========F3 INPUT======;
 F3Input:
+CALL F3_in
 RET
 
 
@@ -262,7 +263,7 @@ Kernel_F1:
 	RET
 
 Kernel_F3:
-	;
+	%include "F3.asm"
 	RET
 
 StoreReg:
@@ -285,3 +286,4 @@ sKernelLoaded: db "Kernel loaded succesfully!", 0
 sKernelLoadedHddErrors: db "Kernel HDD error: ", 0
 
 %include "F2Mode.asm"
+%include "Text_extended.asm"
