@@ -1,7 +1,12 @@
-renderer_setPal:
-	;placeholder
-	RET
-
+FillScreen:
+PUSH WORD [ESP+2]
+PUSH 0
+PUSH 0
+PUSH 320
+PUSH 220
+CALL DrawRectangle
+ADD SP, 0xA
+RET
 
 ;DrawRectangle breaks AX, BX, CX and DX
 DrawRectangle: ;color, x, y, width, height; I could optimize that by mixing color with height?
@@ -25,11 +30,11 @@ DrawRectangle: ;color, x, y, width, height; I could optimize that by mixing colo
 
 	drawLoop:
 	
-	CMP DX, 0 ;if height is -1 then return
-	JE drawDone
+	TEST DX, DX ;if height is -1 then return
+	JZ drawDone
 		drawLoopWidth:
-		CMP CX, 0
-		JE drawDoneWidth
+		TEST CX, CX
+		JZ drawDoneWidth
 		STOSB ; drawPixel
 		DEC CX ; decrease pointer
 		JMP drawLoopWidth

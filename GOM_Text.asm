@@ -2,14 +2,14 @@ text_linebreak db 0Dh, 0Ah, 00
 
 printtext:
 	PUSH AX
-	MOV AX, 0
+	XOR AX, AX
 	MOV ES, AX
 	POP AX
 	PUSH BX
 .loop:
 	LODSB 		
-	cmp AL, 0
-	je .ex		
+	TEST AL, AL
+	jz .ex		
 	MOV AH, 0Eh
 	MOV BH, 0
 	MOV BL, BYTE [0x500]
@@ -26,6 +26,64 @@ SetCursor:
 	MOV DL, [ESP+2]
 	INT 0x10
 	RET
+
+chrtoup: ;tested, works
+CMP AL, 0x61 ; A
+JB strtoup_err
+CMP AL, 0x7A
+JA strtoup_err
+SUB AL, 0x20
+strtoup_err:
+RET
+
+
+
+strtoup: ;tested, works
+MOV SI, [ESP+2]
+strtoup_loop:
+LODSB
+TEST AL, AL
+JZ strtoup_end
+CALL chrtoup
+MOV [SI-1], AL
+JMP strtoup_loop
+strtoup_end:
+RET
+
+
+;1 buffer
+;2 const
+;3 sizeof
+strcmp_n:
+MOV AH, 1
+PUSH SI
+PUSH BX
+PUSH CX
+MOV SI, [ESP+0xC]
+MOV BX, [ESP+0xA]
+MOV CX, [ESP+8]
+strcmp_n_loop:
+	;REPNE
+	TEST CX, CX
+	JZ strcmp_n_ret
+	LODSB
+	CMP [BX], AL
+	JNE strcmp_n_err
+	INC BX
+	DEC CX
+	JMP strcmp_n_loop
+	strcmp_n_err:
+	MOV AH, 0
+	JMP strcmp_n_ret
+strcmp_n_ret: ;AX holds return value
+POP CX
+POP BX
+POP SI
+MOVZX AX, AH
+RET
+
+
+
 
 ;1st string pointer
 ;2nd string pointer
@@ -117,48 +175,6 @@ STRLEN:
 	RET
 		
 
-OutputAllRegisters:
-	PUSH AX ; ESP 6
-	PUSH BX ; ESP 4
-	PUSH CX ; ESP 2
-	PUSH DX ; ESP 0 RET
-
-	MOV [text_stringAX], BYTE 'A'
-	CALL FormatAndDisplayAx
-
-	ADD SP, 4
-	POP AX
-	SUB SP, 6
-	MOV [text_stringAX], BYTE 'B'
-	CALL FormatAndDisplayAx
-
-	ADD SP, 2
-	POP AX
-	SUB SP, 4
-	MOV [text_stringAX], BYTE 'C'
-	CALL FormatAndDisplayAx
-
-	POP AX
-	SUB SP, 2
-	MOV [text_stringAX], BYTE 'D'
-	CALL FormatAndDisplayAx
-
-	POP DX
-	POP CX
-	POP BX
-	POP AX
-	RET
-	
-
-
-FormatAndDisplayAx:
-	PUSH text_stringAX
-	CALL FormatNumber
-	CALL DisplayAh
-	ADD SP, 2
-	RET
-
-
 FormatNumber:
 	MOV BX, [ESP+2] ;if available
 	MOV CX, AX
@@ -198,14 +214,6 @@ FormatNumber:
 	ADD AH, 'A'
 	RET
 
-DisplayAh:
-	MOV SI, text_stringAX
-	call printtext
-	MOV SI, text_buffer
-	call printtext
-	MOV SI, text_linebreak ;I should optimize it to use callable function for print line and casual print
-	call printtext
-	RET	
 
 
 	text_stringAX db 'AX: 0000',0

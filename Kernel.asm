@@ -22,7 +22,6 @@ MOV [0x500], BYTE 4 ;red
 MOV SI, sKernelLoadedHddErrors
 CALL printtext
 MOVZX AX, BYTE [0x501]
-CALL FormatAndDisplayAx
 JMP kernel_setdefmode
 
 kernelLoadSectorFine:	
@@ -32,7 +31,7 @@ CALL printtext
 kernel_setdefmode:
 ;set default mode
 MOV [0x501], BYTE 0
-CALL renderer_setPal
+;CALL renderer_setPal
 
 ;;================KERNEL MAIN LOOP===============;
 
