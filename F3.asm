@@ -1,7 +1,7 @@
 ;it starts directly
 JMP _f3s
 sampleTest: db "Lorem ipsum DolOr Sit Amet", 0
-testText: db "Amet", 0
+testText: db "Lorez", 0
 f3buffer: db "0x0000", 0
 
 _f3s:
@@ -20,8 +20,9 @@ ADD SP, 4
 
 PUSH sampleTest
 PUSH testText
-CALL STRSTR
-ADD SP, 4
+PUSH 5
+CALL strcmp_n
+ADD SP, 6
 PUSH WORD f3buffer-2
 CALL FormatNumber
 ADD SP, 2
