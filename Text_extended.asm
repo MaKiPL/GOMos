@@ -31,24 +31,50 @@ STRCAT: ;concat
 RET
 
 STRSTR: ;locate substr
-RET
-PUSH SI
+PUSH WORD [ESP+2]
+CALL STRLEN
+ADD SP, 2
+PUSH CX
+PUSH DX
 PUSH BX
-PUSH AX
-XOR AX,AX
-MOV SI, [ESP+0A]
-MOV BX, [ESP+8]
-strstr_loop:
-LODSB
-CMP [BX], AL
-INC BX
-JE strstr_innerloop:
-	MOV AX, SI
-;TODO	
-	
-
-
-POP AX
-POP BX
-POP SI
+PUSH SI
+MOVZX CX, AL
+MOV DX, CX
+MOV BX, [ESP+0Ah]
+MOV SI, [ESP+0Ch]
+strstr_mlp:
+	LODSB
+	TEST AL, AL
+	JZ strstr_retml
+	MOV BX, [ESP+0Ah]
+	ADD BX, DX ;//strin+(strlen(strin) - cx)
+	SUB BX, CX
+	MOV AH, [BX]
+	CMP AH, AL
+	JNE strstr_strinelse
+		CMP CX, 1
+		JNE strstr_cxdel
+			SUB SI, DX
+			MOV AX, SI
+			POP SI
+			POP BX
+			POP DX
+			POP CX
+			RET
+		strstr_cxdel:
+		DEC CX
+		JMP strstr_mlp
+	strstr_strinelse:
+	MOV CX, DX
+	MOV AX, 0xFFFF
+	JMP strstr_mlp
 RET
+strstr_retml:
+MOV AX, 0xFFFF
+POP SI
+POP BX
+POP DX
+POP CX
+RET
+
+

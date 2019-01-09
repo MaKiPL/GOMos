@@ -1,6 +1,8 @@
 ;it starts directly
 JMP _f3s
 sampleTest: db "Lorem ipsum DolOr Sit Amet", 0
+testText: db "Amet", 0
+f3buffer: db "0x0000", 0
 
 _f3s:
 PUSH 0
@@ -17,9 +19,13 @@ CALL SetCursor
 ADD SP, 4
 
 PUSH sampleTest
-CALL strtoup
+PUSH testText
+CALL STRSTR
+ADD SP, 4
+PUSH WORD f3buffer-2
+CALL FormatNumber
 ADD SP, 2
-MOV SI, sampleTest
+MOV SI, f3buffer
 CALL printtext
 RET
 
